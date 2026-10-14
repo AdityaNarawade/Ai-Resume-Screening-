@@ -1,0 +1,653 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>TalentRank | AI Resume Screening</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <a class="brand" href="#">
+            <span class="brand-mark">✦</span>
+            <span>Talent<span>Rank</span></span>
+        </a>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <nav>
+            <a class="nav-item active" href="#dashboard">
+                ▦ Dashboard
+            </a>
+
+            <a class="nav-item" href="#screening">
+                ↑ Upload CVs
+            </a>
+
+            <a class="nav-item" href="#candidates">
+                ♙ Candidates
+            </a>
+
+            <a class="nav-item" href="#analytics">
+                ▥ Analytics
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="help-card">
+                <div class="help-icon">?</div>
+
+                <b>Need help?</b>
+
+                <p>Learn how candidate matching works.</p>
+
+                <a href="#" onclick="openHelp(); return false;">View guide ↗</a>
+                
+<!-- Help Guide Modal -->
+<div id="helpModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeHelp()">×</button>
+        <h2>TalentRank User Guide</h2>
+
+        <h3>1. Upload CVs</h3>
+        <p>Select one or more candidate resumes in PDF format.</p>
+
+        <h3>2. Enter Job Description</h3>
+        <p>Enter the job role, responsibilities, and required skills.</p>
+
+        <h3>3. Screen Resumes</h3>
+        <p>Click the screening button to calculate skill overlap
+        and text similarity scores.</p>
+
+        <h3>4. Review Results</h3>
+        <p>View candidate rankings, match scores, and analytics.</p>
+
+        <button onclick="closeHelp()">Got it</button>
+    </div>
+</div>
+
+            </div>
+
+            <div class="user-mini">
+                <div class="avatar">A</div>
+
+                <div>
+                    <b>Admin User</b>
+                    <small>Recruitment workspace</small>
+                    
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="dashboard">
+
+        <header class="topbar">
+
+            <div class="mobile-brand">
+                ✦ TalentRank
+            </div>
+
+            <div class="breadcrumb">
+                Workspace / <b>Dashboard</b>
+            </div>
+
+            <div class="top-actions">
+
+                <div class="status">
+                    <i></i> Screening workspace
+                </div>
+
+                <div class="avatar small">A</div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE HEADING -->
+        <section class="page-heading">
+
+            <div>
+                <div class="eyebrow">
+                    RECRUITMENT OVERVIEW
+                </div>
+
+                <h1>Resume Screening</h1>
+
+                <p>
+                    Find relevant candidates with skill-based
+                    resume matching.
+                </p>
+            </div>
+
+            <a href="#screening"
+               class="button button-primary">
+                + New Screening
+            </a>
+
+        </section>
+
+
+        <!-- KPI CARDS -->
+        <section class="stats-grid">
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Total Resumes</span>
+                    <span class="stat-icon blue">♙</span>
+                </div>
+
+                <div class="stat-value" id="totalResumes">0</div>
+
+                <div class="stat-foot">
+                    PDFs selected
+                </div>
+            </article>
+
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Screened Candidates</span>
+                    <span class="stat-icon violet">✓</span>
+                </div>
+
+                <div class="stat-value" id="screened">0</div>
+
+                <div class="stat-foot">
+                    Successfully analyzed
+                </div>
+            </article>
+
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Average Match Score</span>
+                    <span class="stat-icon green">%</span>
+                </div>
+
+                <div class="stat-value" id="averageMatch">
+                    0%
+                </div>
+
+                <div class="stat-foot">
+                    Across screened resumes
+                </div>
+            </article>
+
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <span>Top Match</span>
+                    <span class="stat-icon amber">★</span>
+                </div>
+
+                <div class="stat-value" id="topMatch">—</div>
+
+                <div class="stat-foot">
+                    Highest relevance score
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- SCREENING SECTION -->
+        <section class="content-grid">
+
+            <article class="panel screening-panel"
+                     id="screening">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <div class="eyebrow">
+                            START A NEW SEARCH
+                        </div>
+
+                        <h2>Screen Resumes</h2>
+
+                        <p>
+                            Provide a job description and upload PDF resumes.
+                        </p>
+                    </div>
+
+                    <span class="step-pill">01 / INPUT</span>
+
+                </div>
+
+
+                <form id="screenForm">
+
+                    <label for="jobDescription">
+                        Job Description
+                        <span class="required">*</span>
+                    </label>
+
+                    <textarea
+                        id="jobDescription"
+                        name="job_description"
+                        placeholder="Example: We are looking for a Data Analyst with Python, SQL, Excel, Power BI and data visualization skills..."
+                        required></textarea>
+
+                    <div class="form-hint">
+                        Include responsibilities and required skills.
+                    </div>
+
+
+                    <label>
+                        Candidate Resumes
+                        <span class="required">*</span>
+                    </label>
+
+
+                    <label class="dropzone" id="dropzone">
+
+                        <input
+                            id="resumeFiles"
+                            name="resumes"
+                            type="file"
+                            accept=".pdf,application/pdf"
+                            multiple
+                        >
+
+                        <span class="upload-symbol">↑</span>
+
+                        <b>
+                            Drop PDF resumes here or
+                            <span>browse files</span>
+                        </b>
+
+                        <small>
+                            PDF files only · Maximum 30 MB
+                        </small>
+
+                        <span class="file-count" id="fileCount">
+                            No files selected
+                        </span>
+
+                    </label>
+                    <!-- Uploaded Resume List -->
+<div id="uploadedList" class="uploaded-list">
+
+    <div class="uploaded-heading">
+        <b>Uploaded Resumes</b>
+        <span id="uploadedTotal">0 files</span>
+    </div>
+
+    <div id="resumeItems"></div>
+
+</div>
+
+
+                    <div class="form-actions">
+
+                        <span class="secure-note">
+                            Files processed for this screening session.
+                        </span>
+
+                        <button
+                            class="button button-primary"
+                            id="screenButton"
+                            type="submit">
+
+                            ✦ Run AI Screening →
+
+                        </button>
+
+                    </div>
+
+                    <div id="message" class="message"></div>
+
+                </form>
+
+            </article>
+
+
+            <!-- MATCHING METHOD -->
+            <article class="panel method-panel"
+                     id="how-it-works">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <div class="eyebrow">
+                            MATCHING METHOD
+                        </div>
+
+                        <h2>How It Works</h2>
+
+                        <p>
+                            A transparent, two-part relevance score.
+                        </p>
+                    </div>
+
+                    <span class="method-icon">✧</span>
+
+                </div>
+
+
+                <div class="method-row">
+
+                    <div class="method-number">01</div>
+
+                    <div>
+                        <b>Skill Overlap</b>
+                        <p>
+                            Checks which job skills appear in each resume.
+                        </p>
+                    </div>
+
+                    <strong>60%</strong>
+
+                </div>
+
+
+                <div class="method-row">
+
+                    <div class="method-number">02</div>
+
+                    <div>
+                        <b>Text Similarity</b>
+                        <p>
+                            Compares resume and job description using TF-IDF.
+                        </p>
+                    </div>
+
+                    <strong>40%</strong>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <span>Combined relevance score</span>
+
+                    <b>
+                        60% skill match + 40% text similarity
+                    </b>
+
+                </div>
+
+
+                <div class="notice">
+                    <span>ⓘ</span>
+
+                    <p>
+                        Scores are experimental relevance indicators,
+                        not hiring decisions. Review every resume manually.
+                    </p>
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- CANDIDATE TABLE -->
+        <section class="panel candidates-panel"
+                 id="candidates">
+
+            <div class="panel-heading candidates-heading">
+
+                <div>
+                    <div class="eyebrow">
+                        SCREENING RESULTS
+                    </div>
+
+                    <h2>Candidate Ranking</h2>
+
+                    <p>
+                        Sorted by combined relevance score.
+                    </p>
+                </div>
+
+                <a class="button button-outline"
+                   href="/download">
+                    ↓ Export CSV
+                </a>
+
+            </div>
+
+
+            <div class="table-tools">
+
+                <div class="search-box">
+                    <span>⌕</span>
+
+                    <input
+                        id="candidateSearch"
+                        type="search"
+                        placeholder="Search candidate or skill..."
+                    >
+                </div>
+
+                <span class="result-count" id="resultCount">
+                    0 candidates
+                </span>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>CANDIDATE / FILE</th>
+                            <th>SKILL MATCH</th>
+                            <th>TEXT SIMILARITY</th>
+                            <th>FINAL SCORE</th>
+                            <th>SKILL COVERAGE</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="candidateTable">
+
+                        <tr>
+                            <td colspan="6">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">⌕</div>
+
+                                    <b>No screening results yet</b>
+
+                                    <p>
+                                        Upload PDF resumes and run screening
+                                        to see candidates here.
+                                    </p>
+
+                                </div>
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="table-footer">
+
+                <span id="tableFooterText">
+                    Waiting for resumes
+                </span>
+
+                <span class="legend">
+                    ● Score based on entered job description
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- ANALYTICS -->
+       
+<!-- ANALYTICS DASHBOARD -->
+<section id="analytics" class="analytics-dashboard">
+
+    <div class="analytics-title">
+        <div>
+            <div class="eyebrow">DATA INSIGHTS</div>
+            <h2>Recruitment Analytics</h2>
+            <p>Visual analysis of screened candidate resumes.</p>
+        </div>
+
+        <span class="live-badge">● Live Results</span>
+    </div>
+
+
+    <!-- FIRST ROW -->
+    <div class="chart-grid">
+
+        <!-- Doughnut Chart -->
+        <article class="panel chart-card">
+
+            <div class="panel-heading">
+                <div>
+                    <h2>Candidate Score Distribution</h2>
+                    <p>Distribution by final relevance score.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="distributionChart"></canvas>
+            </div>
+
+            <div class="chart-legend">
+                <span><i class="dot blue-dot"></i> 80–100%</span>
+                <span><i class="dot purple-dot"></i> 60–79%</span>
+                <span><i class="dot orange-dot"></i> 40–59%</span>
+                <span><i class="dot gray-dot"></i> 0–39%</span>
+            </div>
+
+        </article>
+
+
+        <!-- Candidate Comparison -->
+        <article class="panel chart-card">
+
+            <div class="panel-heading">
+                <div>
+                    <h2>Candidate Score Comparison</h2>
+                    <p>Skill match vs text similarity.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+        </article>
+
+    </div>
+
+
+    <!-- SECOND ROW -->
+    <div class="chart-grid">
+
+        <!-- Skill Analysis -->
+        <article class="panel chart-card">
+
+            <div class="panel-heading">
+                <div>
+                    <h2>Skill Match Analysis</h2>
+                    <p>Number of resumes containing each required skill.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="skillChart"></canvas>
+            </div>
+
+        </article>
+
+
+        <!-- Radar Chart -->
+        <article class="panel chart-card">
+
+            <div class="panel-heading">
+                <div>
+                    <h2>Overall Skills Coverage</h2>
+                    <p>Percentage of resumes matching each skill.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+
+        </article>
+
+    </div>
+
+
+    <!-- ANALYTICS SUMMARY -->
+    <div class="analytics-summary">
+
+        <div class="summary-card">
+            <span>Total Candidates</span>
+            <b id="analyticsTotal">0</b>
+        </div>
+
+        <div class="summary-card">
+            <span>Average Score</span>
+            <b id="analyticsAverage">0%</b>
+        </div>
+
+        <div class="summary-card">
+            <span>Skills Required</span>
+            <b id="analyticsSkills">0</b>
+        </div>
+
+        <div class="summary-card">
+            <span>Top Match Score</span>
+            <b id="analyticsTop">0%</b>
+        </div>
+
+    </div>
+
+</section>
+
+
+        <footer>
+            TalentRank · AI-assisted resume relevance screening
+
+            <span class="footer-right">
+                Built with Flask & NLP
+            </span>
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
